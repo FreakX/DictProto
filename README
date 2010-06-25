@@ -1,0 +1,31 @@
+DictProto
+
+- Easy Dictionary Protocol -
+
+#After youve loaded the DictProto library,
+#you have to initialize a DictProto socket.
+
+
+import DictProto
+socket = DictProto.Socket(DictProto.SERVER_SOCK  # For the server or::
+			  DictProto.CLIENT_SOCK, # For the Client
+			  6724,			 # Port (Server and Client)
+			  "127.0.0.1"		 # Host (Only Client)
+			  )
+
+#After You have initialized the server socket, you can listen on it.
+
+socket.Listen()	
+
+#The Socket listens for a Client, until a Client connects
+
+#Then You can Send, or Receive Dictionarys.
+
+#Server:
+print socket.Receive()
+
+#Client:
+socket.Send({"CMD" : "Hi"})
+
+#Server Shell:
+{"CMD" : "Hi"}

@@ -14,27 +14,40 @@ class Socket(object):
             self.socket.connect((host, port))
         self.socktype = socktype
         self.port = port
-        self.protoverstr = "DictProto_v1.0"
+        self.protoverstr = "DictProto_v1.1"
     def __del__(self):
         self.socket.close()
     def Listen(self):
         self.socket.listen(1)
-        conn, addr = self.socket.accept()
-        self.conn = conn
-        print 'Connection from', addr
+        self.conn, addr = self.socket.accept()
+    
 
         
     def Send(self, datadict):
         packet = []
         packet.append(self.protoverstr)
         for x in datadict:
-            keylen = len(str(x))
+            keylen = hex(len(str(x)))[2:]
+            if len(keylen) == 1:
+                packet.append("0")
+                packet.append(keylen)
+            else:
+                packet.append(keylen)
+                
             key = str(x)
-            datalen = len(str(datadict[x]))
-            data = str(datadict[x])
-            packet.append(str(keylen))
             packet.append(key)
-            packet.append(str(datalen))
+            
+            datalen = hex(len(str(datadict[x])))[2:]
+            if len(datalen) == 1:
+                packet.append("00")
+                packet.append(datalen)
+            elif len(datalen) == 2:
+                packet.append("0")
+                packet.append(datalen)
+            else:
+                packet.append(datalen)
+                
+            data = str(datadict[x])
             packet.append(data)
             
         if self.socktype == CLIENT_SOCK: self.socket.send(''.join(packet))
@@ -50,14 +63,17 @@ class Socket(object):
                 offset = 0
                 while True:
                     try:
-                        keylen = int(data[offset:offset+1])
-                        offset +=1
+                        keylen = int(data[offset:offset+2], 16)
+                        offset +=2
                         key = data[offset:offset+keylen]
                         offset +=keylen
-                        datalen = int(data[offset:offset+1])
-                        offset +=1
+                        datalen = int(data[offset:offset+3], 16)
+                        offset +=3
                         pdata = data[offset:offset+datalen]
                         offset +=datalen
+
+
+                        
                         returndict[key] = pdata
 
                     except:
